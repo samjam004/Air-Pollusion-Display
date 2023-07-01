@@ -264,8 +264,8 @@ class App():
 
 
         self.big_aqi = customtkinter.CTkLabel(self.big_display_inr_frm,
-                                               text = "AQI: " + self.big_aqi_text, 
-                                              font = ("San Francisco", 30, 'bold'))
+                                               text = "Air Quality Index:\n" + self.big_aqi_text, 
+                                              font = ("San Francisco", 50, 'bold'))
         self.big_city_name = customtkinter.CTkLabel(self.big_display_inr_frm, 
                                                     font = ("San Francisco", 27, 'bold'),
                                                     text_color="white",
@@ -291,7 +291,7 @@ class App():
         self.big_station.grid(row = 1, column = 4, sticky = "sew")
         self.big_details.grid(row = 2, column = 0, sticky = "new", pady = (0, 150), padx = 20)
         self.big_temp.grid(row = 1, column = 0, sticky = "nsew", padx = 20)        
-        self.big_aqi.grid(row = 2, column = 2)
+        self.big_aqi.grid(row = 2, column = 2, sticky = "ewn")
         self.big_city_name.grid(row = 0, column = 2)
         self.big_coords.grid(row = 0, column = 2, pady = (75, 0))        
         self.big_bar.grid(row = 2, columnspan = 5, sticky = "sew", pady = (100,0))
