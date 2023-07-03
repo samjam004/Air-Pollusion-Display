@@ -20,14 +20,14 @@ class App():
 
     cities = {}
     preload_bool = True
-    big_aqi_text = "--"
-    big_city_text = "--"
-    big_coords_text = "--"
-    big_temp_text = "--"
-    big_hu_text = "__"
-    big_ws_text = "__"
-    big_station_text = "__"
-    big_pollutant_text = "__"
+    big_aqi_text = ""
+    big_city_text = ""
+    big_coords_text = ""
+    big_temp_text = ""
+    big_hu_text = ""
+    big_ws_text = ""
+    big_station_text = ""
+    big_pollutant_text = ""
 
     def __init__(self):
         #Initializes CTk class and root window (root)
@@ -60,7 +60,7 @@ class App():
         self.search_entry.lift()
 
 
-
+        #Buttons for more info on severity of AQI, to do
         self.color_indicator = customtkinter.CTkButton(self.root, fg_color="green",
                                                         text = ("Good").center(30) + "\n\n0 to 50", 
                                                         text_color = "black", 
@@ -119,19 +119,11 @@ class App():
 
         #Big Display Grid Definition and placement
         self.big_display_inr_frm.rowconfigure((0,1,2), weight = 1)
-        self.big_display_inr_frm.columnconfigure((0,1,2,3,4), weight = 1)       
-        self.big_aqi.grid(row = 2, column = 2)
-        self.big_city_name.grid(row = 0, column = 2)
-        self.big_coords.grid(row = 0, column = 2, pady = (75, 0))
+        self.big_display_inr_frm.columnconfigure((0,1,2,3,4), weight = 1)    
 
-        self.big_temp.grid(row = 0, column = 1, sticky = "nsew")
-
-        
         self.big_display_frm.grid(row = 0, rowspan = 5, column = 2, columnspan = 6, sticky = "nsew")
         self.big_display_inr_frm.grid(row = 0, rowspan = 4, column = 2, columnspan = 6, 
                                       padx = 20, pady = (75, 0), sticky = "nsew")
-        
-        self.powered_by.grid(row = 4, column = 0, columnspan = 2, sticky = "ews", pady = (0,20))
 
         #AQI-Level Buttons
         self.color_indicator.grid(row = 4, column = 2, sticky = "ews", pady = (0,50))
@@ -189,8 +181,8 @@ class App():
         #print(self.cities) 
 
     def updateGUI(self, AQI, city):     
-        #New city creation and placement algorithm
 
+        #Small Display AQI Colors
         if AQI <= 50:
             bgColor = "green"
         elif AQI <=100:
@@ -204,6 +196,7 @@ class App():
         elif AQI >=301:
             bgColor = "maroon"
 
+        #New city creation and placement algorithm
         colset = 0
         if len(self.cities) % 2 == 0:
             colset = 1
@@ -233,9 +226,13 @@ class App():
         self.addToBigDisplay(city, bgColor)
         #Testing Algorithm
         #print((str)((len(self.cities) + 1) // 2) + " " + (str)(colset))
-        
+    
+    #Adds the data for a called upon city to the big display
+    #@params city the city we're adding
+    #@params bgColor the color that should be in the big bar representing severity
     def addToBigDisplay(self, city, bgColor):
 
+        #Changes the values of the big display
         self.big_aqi_text = (str)(self.cities[city]['aqi'])
         self.big_city_text = city
         lat = (str)(self.cities[city]['lat'])
@@ -246,7 +243,7 @@ class App():
         self.big_ws_text = "Wind Speed: " + (str)(self.cities[city]['windspd']) + "m/s"
         self.big_station_text = "Station:\n" + (self.cities[city]['station']).center(30)
 
- 
+        #Interprets pollutant abbreviations to their proper names
         pollutants = {
             'p1': 'PM 10',
             'p2': 'PM 2.5',
@@ -256,9 +253,9 @@ class App():
             'co': 'Carbon Minoxide (CO)'
         }
         mainpollutant = pollutants[self.cities[city]['mainpol']]
-
         self.big_pollutant_text = "Main Pollutant: " + mainpollutant
 
+        #Destroys old widgets on big display
         self.big_aqi.destroy()
         self.big_city_name.destroy()
         self.big_coords.destroy()
@@ -267,7 +264,7 @@ class App():
         self.big_station.destroy()
         self.big_pollutant.destroy()
 
-
+        #Updates new widgets on big display
         self.big_aqi = customtkinter.CTkLabel(self.big_display_inr_frm,
                                                text = "AQI: " + self.big_aqi_text, 
                                               font = ("San Francisco", 50, 'bold'))
@@ -295,6 +292,7 @@ class App():
                                                     font = ("San Francisco", 20, 'bold'),
                                                     text = self.big_pollutant_text)
 
+        #Places new widgets on big display
         self.big_pollutant.grid(row = 2, column = 2, sticky = "sew", pady= (0, 75))
         self.big_station.grid(row = 1, column = 4, sticky = "sew")
         self.big_details.grid(row = 2, column = 0, sticky = "new", pady = (0, 150), padx = 20)
@@ -304,10 +302,14 @@ class App():
         self.big_coords.grid(row = 0, column = 2, pady = (75, 0))        
         self.big_bar.grid(row = 2, columnspan = 5, sticky = "sew", pady = (100,0))
             
+    #Calls openweatherapi and iqair api for a cities' air quality data
+    #@params city the city we want, scraped from the search box
     def getAQI(self, city):
-        api_working = True
-        API_KEY = "55aacb9295ecb0dcfabd6c36a7a25bd0" 
 
+        API_KEY = "55aacb9295ecb0dcfabd6c36a7a25bd0" 
+        
+        #uses openweather api to find coordinates of the city by name
+        #then iqair to use the coordinates to find precise air data
         try:
             BASE_GEO_URL = "http://api.openweathermap.org/geo/1.0/direct?q="
             geo_url = BASE_GEO_URL + city + "&limit=1&appid=" + API_KEY
@@ -331,6 +333,8 @@ class App():
             #Testing
             print(aqi_response.status_code)
 
+            #If they don't like I'm spamming their unpaid service with requests, 
+            #pops up a "please wait" window
             if aqi_response.status_code == 429:
                 self.popup = customtkinter.CTkToplevel(self.root)
                 self.popup.title("API Loading...")
@@ -344,6 +348,7 @@ class App():
                 self.popup_lbl.grid(row = 1, column = 1, sticky = "nsew", 
                                     padx = 30, pady = 30)
 
+            #Assigns the data from iq air to city dictionary 
             tempF = (aqi_response.json()['data']['current']['weather']['tp'] * (9/5)) + 32
             city_data = {
                 'station':aqi_response.json()['data']['city'],
@@ -362,10 +367,14 @@ class App():
 
             #Testing
             #print(self.cities)
+
+            
         except IndexError:
             aqi = None
+            #if theres an error, will not create new widgets for the small display 
         except KeyError:
             aqi = None
+            #if theres an error, will not create new widgets for the small display 
 
         return aqi
 
