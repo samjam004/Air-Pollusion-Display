@@ -3,15 +3,15 @@ import customtkinter
 import requests
 
 #AQI Display App
-#By Samuel Mount
-#July 1, 2023
+#Samuel Mount
+#Last Updated July 3, 2023
 
 #TO DO
-#Fix text shifting upon city names of varying lengths
+#Fix text shifting upon city names and other variables of varying lengths
 #AQI Intensity explanation buttons and pop up windows
 #Pictures and icons
 #Links to powered by 
-#API Status display
+
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -27,6 +27,7 @@ class App():
     big_hu_text = "__"
     big_ws_text = "__"
     big_station_text = "__"
+    big_pollutant_text = "__"
 
     def __init__(self):
         #Initializes CTk class and root window (root)
@@ -92,24 +93,14 @@ class App():
                                                         hover_color="white", corner_radius= 0)
 
         #Big Display Widgets
-        self.big_aqi = customtkinter.CTkLabel(self.big_display_inr_frm, 
-                                              text = "AQI: " + self.big_aqi_text, 
-                                              font = ("San Francisco", 30, 'bold'))
-        self.big_city_name = customtkinter.CTkLabel(self.big_display_inr_frm, 
-                                                    font = ("San Francisco", 27, 'bold'),
-                                                    text_color="white",
-                                                    text = self.big_city_text)
-        self.big_coords = customtkinter.CTkLabel(self.big_display_inr_frm, 
-                                                    font = ("San Francisco", 20),
-                                                    text_color="white",
-                                                    text = self.big_coords_text)  
-        self.big_temp = customtkinter.CTkLabel(self.big_display_inr_frm,
-                                               font = ("San Francisco", 25),
-                                               text_color = "white",
-                                               text = self.big_temp_text)
+        self.big_aqi = customtkinter.CTkLabel(self.big_display_inr_frm)
+        self.big_city_name = customtkinter.CTkLabel(self.big_display_inr_frm)
+        self.big_coords = customtkinter.CTkLabel(self.big_display_inr_frm)  
+        self.big_temp = customtkinter.CTkLabel(self.big_display_inr_frm)
         self.main_cont = customtkinter.CTkLabel(self.big_display_inr_frm)
         self.big_details = customtkinter.CTkLabel(self.big_display_inr_frm)
         self.big_station = customtkinter.CTkLabel(self.big_display_inr_frm)
+        self.big_pollutant = customtkinter.CTkLabel(self.big_display_inr_frm)
 
         self.powered_by = customtkinter.CTkLabel(self.root, font = ("San Francisco", 15, 'bold'),
                                                 text = "Powered by IQAir \n and OpenWeather",
@@ -253,7 +244,20 @@ class App():
         self.big_temp_text = (str)(self.cities[city]['temp'])
         self.big_hu_text = "Humidity: " + (str)(self.cities[city]['humidity']) + "%"
         self.big_ws_text = "Wind Speed: " + (str)(self.cities[city]['windspd']) + "m/s"
-        self.big_station_text = "Station:\n" + (self.cities[city]['station']).center(25)
+        self.big_station_text = "Station:\n" + (self.cities[city]['station']).center(30)
+
+ 
+        pollutants = {
+            'p1': 'PM 10',
+            'p2': 'PM 2.5',
+            'o3': 'Ozone (03)',
+            'n2': 'Nitrogen Dioxide (NO2)',
+            's2': 'Sulfur Dioxide (SO2)',
+            'co': 'Carbon Minoxide (CO)'
+        }
+        mainpollutant = pollutants[self.cities[city]['mainpol']]
+
+        self.big_pollutant_text = "Main Pollutant: " + mainpollutant
 
         self.big_aqi.destroy()
         self.big_city_name.destroy()
@@ -261,13 +265,14 @@ class App():
         self.big_temp.destroy()
         self.big_details.destroy()
         self.big_station.destroy()
+        self.big_pollutant.destroy()
 
 
         self.big_aqi = customtkinter.CTkLabel(self.big_display_inr_frm,
-                                               text = "Air Quality Index:\n" + self.big_aqi_text, 
+                                               text = "AQI: " + self.big_aqi_text, 
                                               font = ("San Francisco", 50, 'bold'))
         self.big_city_name = customtkinter.CTkLabel(self.big_display_inr_frm, 
-                                                    font = ("San Francisco", 27, 'bold'),
+                                                    font = ("San Francisco", 30, 'bold'),
                                                     text_color="white",
                                                     text = self.big_city_text)
         self.big_coords = customtkinter.CTkLabel(self.big_display_inr_frm, 
@@ -286,12 +291,15 @@ class App():
         self.big_station = customtkinter.CTkLabel(self.big_display_inr_frm, 
                                                   text = self.big_station_text,
                                                   font = ("San Francisco", 24, 'bold'))        
+        self.big_pollutant = customtkinter.CTkLabel(self.big_display_inr_frm,
+                                                    font = ("San Francisco", 20, 'bold'),
+                                                    text = self.big_pollutant_text)
 
-
+        self.big_pollutant.grid(row = 2, column = 2, sticky = "sew", pady= (0, 75))
         self.big_station.grid(row = 1, column = 4, sticky = "sew")
         self.big_details.grid(row = 2, column = 0, sticky = "new", pady = (0, 150), padx = 20)
         self.big_temp.grid(row = 1, column = 0, sticky = "nsew", padx = 20)        
-        self.big_aqi.grid(row = 2, column = 2, sticky = "ewn")
+        self.big_aqi.grid(row = 2, column = 2, sticky = "ewn", pady = (70, 0))
         self.big_city_name.grid(row = 0, column = 2)
         self.big_coords.grid(row = 0, column = 2, pady = (75, 0))        
         self.big_bar.grid(row = 2, columnspan = 5, sticky = "sew", pady = (100,0))
@@ -319,8 +327,23 @@ class App():
             AQI_API_KEY = "8bbace4c-0c2b-4bd9-85f8-f22e839ec0ed"
             aqi_url = f"http://api.airvisual.com/v2/nearest_city?lat={lat}&lon={lon}&key={AQI_API_KEY}"
             aqi_response = requests.get(aqi_url)
+
             #Testing
             print(aqi_response.status_code)
+
+            if aqi_response.status_code == 429:
+                self.popup = customtkinter.CTkToplevel(self.root)
+                self.popup.title("API Loading...")
+                self.popup_frm = customtkinter.CTkFrame(self.popup)
+                self.popup_frm.rowconfigure(0, weight= 1)
+                self.popup_frm.columnconfigure(0, weight=1)
+                self.popup_lbl = customtkinter.CTkLabel(self.popup_frm, 
+                                                        text = "Attempting to gather data, please wait 5 seconds",
+                                                        font = ("San Francisco", 20, 'bold'))
+                self.popup_frm.grid(sticky = "nsew")
+                self.popup_lbl.grid(row = 1, column = 1, sticky = "nsew", 
+                                    padx = 30, pady = 30)
+
             tempF = (aqi_response.json()['data']['current']['weather']['tp'] * (9/5)) + 32
             city_data = {
                 'station':aqi_response.json()['data']['city'],
